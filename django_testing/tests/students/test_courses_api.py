@@ -28,7 +28,7 @@ def test_course_list(api_client, course_factory):
 def test_course_filter_id(api_client, course_factory):
     course = course_factory(_quantity=3)
     url = reverse("courses-list")
-    resp = api_client.get(url, {'id': 2})
+    resp = api_client.get(url, {'id': course[0].id})
     assert resp.status_code == HTTP_200_OK
 
     resp_json = resp.json()
@@ -36,12 +36,12 @@ def test_course_filter_id(api_client, course_factory):
 
 
 @pytest.mark.django_db
-def test_course_filter_name(api_client, course_factory):
-    url = reverse("courses-list")
+def test_course_filter_name(api_client, student_factory, course_factory):
     course = Course.objects.bulk_create([
         Course(name='two course'),
         Course(name='one course'),
     ])
+    url = reverse("courses-list")
     resp = api_client.get(url, {'name': 'one course'})
     assert resp.status_code == HTTP_200_OK
 
@@ -62,6 +62,8 @@ def test_courses_create(api_client):
 
     resp_json = resp.json()
     assert len(resp_json) == 1
+    assert resp_json[0]['name'] == course.name
+
 
 
 @pytest.mark.django_db
